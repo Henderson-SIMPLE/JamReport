@@ -1,0 +1,75 @@
+JAM Report — Estrutura de pastas
+==================================
+
+jamreport/
+│
+├── app.py                      Ponto de entrada Flask. Cria a app,
+│                                carrega config, inicializa o DB e
+│                                registra os blueprints (import + dashboard).
+│
+├── config.py                   Le o .env (via caminho absoluto) e monta
+│                                a Config do Flask (DB URI, SECRET_KEY).
+│
+├── database.py                 db = SQLAlchemy() — instância única,
+│                                importada por app.py e por models/.
+│
+├── requirements.txt             Dependências Python (pip install -r).
+│
+├── .env.example                  Modelo de variáveis de ambiente.
+│                                 Copiar para .env e preencher com dados reais.
+│                                 O .env real NUNCA vai para o Git.
+│
+├── .gitignore
+├── README.md                    Documentação completa do projeto.
+├── ESTRUTURA.txt                 Este arquivo.
+│
+├── database/
+│   ├── schema.sql                DDL completo — criação de todas as tabelas.
+│   │                              Rodar uma única vez, na criação do banco.
+│   └── limpar_dados.sql          TRUNCATE em todas as tabelas de dados
+│                                  (preserva a estrutura e o usuário admin).
+│
+├── models/
+│   └── __init__.py                Todas as classes SQLAlchemy, mapeando
+│                                   1:1 as tabelas do schema.sql:
+│                                   User, ImportedFile, Simulado, Challenge,
+│                                   SimuladoChallenge, Team, Participant,
+│                                   TeamMember, SimuladoTeam,
+│                                   TeamChallengeResult, ChallengeSolver,
+│                                   ChallengeMetric, AwsService,
+│                                   ChallengeService, TeamService,
+│                                   EventFeedback.
+│
+├── services/
+│   ├── __init__.py                (vazio — só marca o pacote)
+│   └── json_importer.py           Núcleo do sistema: recebe os bytes do
+│                                   JSON exportado da AWS, faz o parsing
+│                                   (double-decode), extrai/deduz a data do
+│                                   simulado (nome do arquivo > fallback do
+│                                   JSON), e grava tudo no banco através
+│                                   dos models. Função principal:
+│                                   importar_relatorio(...).
+│
+└── routes/
+    ├── __init__.py                 (vazio — só marca o pacote)
+    │
+    ├── import_routes.py            Blueprint "import_bp":
+    │                                  GET/POST /importar          (manual)
+    │                                  GET/POST /importar/auto     (automático)
+    │                                  GET/POST /importar/lote     (vários arquivos)
+    │                                  POST     /importar/api      (versão JSON)
+    │
+    ├── dashboard_routes.py         Blueprint "dashboard_bp":
+    │                                  GET /dashboard                       (visão geral + heatmap)
+    │                                  GET /dashboard/simulado/<id>         (detalhe: JAMs, equipes,
+    │                                                                         gráfico, status por JAM)
+    │                                  GET /dashboard/jams                  (catálogo de JAMs, paginado)
+    │                                  GET /dashboard/servicos              (ranking de serviços AWS)
+    │                                  GET /dashboard/equipes               (lista de equipes)
+    │                                  GET /dashboard/equipe/<id>           (histórico de uma equipe)
+    │
+    └── dashboard_common.py          Layout compartilhado entre todas as
+                                      telas (BASE_HEAD, NAVBAR) e helpers
+                                      de formatação (badges de status,
+                                      barras de progresso, paginação,
+                                      formatação de tempo).
